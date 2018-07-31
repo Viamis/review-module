@@ -9,17 +9,34 @@ import {
 } from './serverHelpers';
 import { db } from '../database/connection';
 
-const express = require('express');
-const morgan = require('morgan');
-const bodyParser = require('body-parser');
+import express from 'express';
+import bodyParser from 'body-parser';
+import path from 'path';
+import cors from 'cors';
 
 const app = express();
 const port = process.env.PORT || 3004;
 
+app.use(cors());
+
 const jsonParser = bodyParser.json();
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
-app.use(express.static('public'));
+app.get('*/bundle.js', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '../public/bundle.js'));
+});
+
+app.get('*/tether.min.js', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '../node_modules/tether/dist/js/tether.min.js'));
+});
+
+app.get('*/drop.min.js', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '../node_modules/tether-drop/dist/js/drop.min.js'));
+});
+
+app.get('*/drop-theme-arrows.css', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '../node_modules/tether-drop/dist/css/drop-theme-arrows.css'));
+});
 
 app.get('/reviewsummary/:productId', (req, res) => {
   const product = Number(req.params.productId);
@@ -59,5 +76,7 @@ app.post('/reportcomment', (req, res) => {
   // TODO: add abuse incrementing
   res.send();
 });
+
+app.use('/*', express.static('public'));
 
 app.listen(port, () => console.log('Listening on port:', port));
